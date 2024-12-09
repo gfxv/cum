@@ -23,6 +23,12 @@ const qrDir = "./qr"
 
 func main() {
 
+	if err := prepareDir(qrDir); err != nil {
+		fmt.Println(err)
+		panic(err.Error())
+	}
+	defer cleanUpDir(qrDir)
+
 	if err := generateQR(filename); err != nil {
 		panic(err.Error())
 	}
@@ -31,6 +37,20 @@ func main() {
 		panic(err.Error())
 	}
 
+}
+
+func prepareDir(dir string) error {
+	if err := os.Mkdir(dir, os.ModePerm); err != nil {
+		return err
+	}
+	return nil
+}
+
+func cleanUpDir(dir string) error {
+	if err := os.RemoveAll(dir); err != nil {
+		return err
+	}
+	return nil
 }
 
 func generateQR(filename string) error {
