@@ -1,0 +1,1 @@
+-framerate 20 -i ./qr/file-%d.png -c:v libx264 -crf 21 -preset veryslow -profile:v high -movflags +faststart -pix_fmt yuv420p -an -r 30
