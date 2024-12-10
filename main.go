@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	_ "embed"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -18,11 +19,24 @@ import (
 var ffmpegFlags string
 
 const bufferSize = 2048
-const qrSize = 1024
-const filename = "test.txt"
-const outputFile = "output.mp4"
+const defaultQRSize = 1024
+
 const qrDir = "./qr"
 const returnTmp = "./returned"
+
+var (
+	action     string
+	in         string
+	out        string
+	qrSizeFlag int
+)
+
+func init() {
+	flag.StringVar(&action, "a", "", "Action: encode or decode. Encode will take an input and convert it to mp4 format. Decode will attempt to convert provided video to oiginal format")
+	flag.StringVar(&in, "in", "", "Path to input file")
+	flag.StringVar(&out, "out", "", "Path to output file (will be created if not exists or overwritten if already exists)")
+	flag.IntVar(&qrSizeFlag, "qrisize", defaultQRSize, fmt.Sprintf("Define a size of QR Code. Can be omitted, default value: %d", defaultQRSize))
+}
 
 func main() {
 
