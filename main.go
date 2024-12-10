@@ -40,34 +40,54 @@ func init() {
 
 func main() {
 
+	flag.Parse()
+
+	switch strings.ToLower(action) {
+	case "encode":
+		if err := Encode(); err != nil {
+			fmt.Printf("can't encode %s, err: %v", in, err)
+		}
+	case "decode":
+		if err := Decode(); err != nil {
+			fmt.Printf("can't decode %s, err: %v", in, err)
+		}
+	default:
+		fmt.Println("unknown action")
+		os.Exit(1)
+	}
+
+}
+
+func Encode() error {
 	if err := prepareDir(qrDir); err != nil {
-		fmt.Println(err)
-		panic(err.Error())
+		return err
 	}
 	defer cleanUpDir(qrDir)
 
-	if err := generateQR(filename); err != nil {
-		panic(err.Error())
+	if err := generateQR(in); err != nil {
+		return err
 	}
 
 	if err := generateVideo(); err != nil {
-		panic(err.Error())
+		return err
 	}
+	return nil
+}
 
+func Decode() error {
 	if err := prepareDir(returnTmp); err != nil {
-		panic(err)
+		return err
 	}
 	defer cleanUpDir(returnTmp)
 
 	if err := splitVideo(); err != nil {
-		fmt.Println(err.Error())
-		panic(err.Error())
+		return err
 	}
 
 	if err := loadFileFromImages(); err != nil {
-		fmt.Println(err)
-		panic(err.Error())
+		return err
 	}
+	return nil
 }
 
 func prepareDir(dir string) error {
@@ -105,7 +125,7 @@ func generateQR(filename string) error {
 
 		qrName := fmt.Sprintf("file-%d.png", indx)
 		qrPath := filepath.Join(qrDir, qrName)
-		if err = qrcode.WriteFile(string(buffer[:n]), qrcode.Medium, qrSize, qrPath); err != nil {
+		if err = qrcode.WriteFile(string(buffer[:n]), qrcode.Medium, defaultQRSize, qrPath); err != nil {
 			return err
 		}
 		indx++
@@ -115,7 +135,7 @@ func generateQR(filename string) error {
 
 func generateVideo() error {
 	flags := strings.Split(strings.Trim(string(ffmpegFlags), "\n"), " ")
-	args := append(flags, outputFile)
+	args := append(flags, out)
 	cmd := exec.Command("ffmpeg", args...)
 	if err := cmd.Run(); err != nil {
 		return err
@@ -124,7 +144,7 @@ func generateVideo() error {
 }
 
 func splitVideo() error {
-	cmd := exec.Command("ffmpeg", "-i", "output.mp4", "-vf", "fps=20", "./returned/%d.png")
+	cmd := exec.Command("ffmpeg", "-i", in, "-vf", "fps=20", "./returned/%d.png")
 	if err := cmd.Run(); err != nil {
 		return err
 	}
@@ -167,7 +187,7 @@ func loadFileFromImages() error {
 	getNextEntryName := nextEntryNameGenerator(len(dirs))
 
 	const returnedSize = 300000
-	// FIX: set capacity as len(dirs) * image_size, leave with hardcoded for now
+	// FIX: set capacity as len(dirs) * image_size, leave as hardcoded for now
 	buff := bytes.NewBuffer(make([]byte, 0, len(dirs)*returnedSize))
 	for _, entry := range dirs {
 		if entry.IsDir() {
@@ -193,8 +213,6 @@ func processEntry(entryName string, buff *bytes.Buffer) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("processing %s\n", path)
 
 	result, err := zbarimgDecode(data)
 	if err != nil {
