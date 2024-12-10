@@ -32,10 +32,10 @@ var (
 )
 
 func init() {
-	flag.StringVar(&action, "a", "", "Action: encode or decode. Encode will take an input and convert it to mp4 format. Decode will attempt to convert provided video to oiginal format")
+	flag.StringVar(&action, "a", "", "Specifies action to perform: encode or decode. Encode will take an input and convert it to mp4 format. Decode will attempt to convert provided video to oiginal format")
 	flag.StringVar(&in, "in", "", "Path to input file")
 	flag.StringVar(&out, "out", "", "Path to output file (will be created if not exists or overwritten if already exists)")
-	flag.IntVar(&qrSizeFlag, "qrisize", defaultQRSize, fmt.Sprintf("Define a size of QR Code. Can be omitted, default value: %d", defaultQRSize))
+	flag.IntVar(&qrSizeFlag, "qrisize", defaultQRSize, "Define a size of QR Code. Can be omitted")
 }
 
 func main() {
