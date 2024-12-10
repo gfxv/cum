@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	_ "embed"
 	"fmt"
 	"io"
@@ -8,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"unsafe"
 
 	"github.com/skip2/go-qrcode"
 )
@@ -20,6 +22,7 @@ const qrSize = 1024
 const filename = "test.txt"
 const outputFile = "output.mp4"
 const qrDir = "./qr"
+const returnTmp = "./returned"
 
 func main() {
 
@@ -78,6 +81,14 @@ func generateQR(filename string) error {
 			return err
 		}
 		indx++
+	}
+	return nil
+}
+
+func splitVideo() error {
+	cmd := exec.Command("ffmpeg", "-i", "output.mp4", "-vf", "fps=20", "./returned/%d.png")
+	if err := cmd.Run(); err != nil {
+		return err
 	}
 	return nil
 }
