@@ -91,7 +91,7 @@ func generateQR(filename string) error {
 
 		qrName := fmt.Sprintf("file-%d.png", indx)
 		qrPath := filepath.Join(qrDir, qrName)
-		if err = qrcode.WriteFile(string(buffer), qrcode.Medium, qrSize, qrPath); err != nil {
+		if err = qrcode.WriteFile(string(buffer[:n]), qrcode.Medium, qrSize, qrPath); err != nil {
 			return err
 		}
 		indx++
